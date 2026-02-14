@@ -1,32 +1,40 @@
-export default function Pagination({ meta, onPageChange }) {
-  if (!meta) return null;
+import { formatDate } from "../utils/format";
+import { getPriorityBadgeClass, getStatusBadgeClass } from "../utils/badges";
 
-  const { page, totalPages, hasPrevPage, hasNextPage } = meta;
-
-  const goPrev = () => hasPrevPage && onPageChange(page - 1);
-  const goNext = () => hasNextPage && onPageChange(page + 1);
-
+export default function TaskCard({ task, onView, onEdit, onDelete }) {
   return (
-    <div className="d-flex justify-content-between align-items-center mt-3">
-      <button
-        className="btn btn-outline-secondary"
-        disabled={!hasPrevPage}
-        onClick={goPrev}
-      >
-        Prev
-      </button>
+    <div className="card h-100 shadow-sm">
+      <div className="card-body">
+        <h5 className="card-title mb-2">{task.title}</h5>
 
-      <div className="text-muted">
-        Page <strong>{page}</strong> of <strong>{totalPages}</strong>
+        <div className="mb-1 d-flex align-items-center gap-2">
+          <span className={`badge ${getStatusBadgeClass(task.status)}`}>
+            {task.status}
+          </span>
+        </div>
+
+        <div className="mb-1 d-flex align-items-center gap-2">
+          <span className={`badge ${getPriorityBadgeClass(task.priority)}`}>
+            {task.priority}
+          </span>
+        </div>
+
+        <div className="mb-0 d-flex align-items-center gap-2">
+          <span className="badge text-bg-dark">{formatDate(task.dueDate)}</span>
+        </div>
       </div>
 
-      <button
-        className="btn btn-outline-secondary"
-        disabled={!hasNextPage}
-        onClick={goNext}
-      >
-        Next
-      </button>
+      <div className="card-footer bg-white border-0 d-flex gap-2">
+        <button className="btn btn-sm btn-outline-dark" onClick={onView}>
+          View
+        </button>
+        <button className="btn btn-sm btn-outline-primary" onClick={onEdit}>
+          Edit
+        </button>
+        <button className="btn btn-sm btn-outline-danger" onClick={onDelete}>
+          Delete
+        </button>
+      </div>
     </div>
   );
 }

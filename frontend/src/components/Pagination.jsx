@@ -1,95 +1,59 @@
-import React, { useState } from "react";
+export default function Pagination({ meta, onPageChange }) {
+  if (!meta) return null;
 
-export default function InlineUserEditor({ user, onCancel, onSave }) {
-  const [form, setForm] = useState({
-    name: user.name || "",
-    email: user.email || "",
-    role: user.role || "user",
-    password: "",
-  });
+  const { page, totalPages, hasPrevPage, hasNextPage, limit, total } = meta;
 
-  const onChange = (e) =>
-    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+  if (totalPages <= 1) return null; // Hide pagination if only 1 page
 
-  const submit = async (e) => {
-    e.preventDefault();
+  const goPrev = () => hasPrevPage && onPageChange(page - 1);
+  const goNext = () => hasNextPage && onPageChange(page + 1);
 
-    // Send password only if admin typed it
-    const payload = {
-      name: form.name,
-      email: form.email,
-      role: form.role,
-      ...(form.password ? { password: form.password } : {}),
-    };
+  // Calculate showing range
+  const start = (page - 1) * limit + 1;
+  const end = Math.min(page * limit, total);
 
-    await onSave(user._id, payload);
-  };
+  // Generate page numbers (simple version)
+  const pages = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pages.push(i);
+  }
 
   return (
-    <form onSubmit={submit} className="p-3 bg-light border rounded">
-      <div className="row g-3 align-items-end">
-        <div className="col-12 col-md-3">
-          <label className="form-label">Name</label>
-          <input
-            className="form-control"
-            name="name"
-            value={form.name}
-            onChange={onChange}
-            required
-          />
-        </div>
-
-        <div className="col-12 col-md-4">
-          <label className="form-label">Email</label>
-          <input
-            className="form-control"
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={onChange}
-            required
-          />
-        </div>
-
-        <div className="col-12 col-md-2">
-          <label className="form-label">Role</label>
-          <select
-            className="form-select"
-            name="role"
-            value={form.role}
-            onChange={onChange}
-          >
-            <option value="user">user</option>
-            <option value="admin">admin</option>
-          </select>
-        </div>
-
-        <div className="col-12 col-md-3">
-          <label className="form-label">Reset Password (optional)</label>
-          <input
-            className="form-control"
-            name="password"
-            type="password"
-            value={form.password}
-            onChange={onChange}
-            placeholder="Leave blank to keep"
-            minLength={6}
-          />
-        </div>
-
-        <div className="col-12 d-flex gap-2">
-          <button className="btn btn-primary" type="submit">
-            Save
-          </button>
-          <button
-            className="btn btn-outline-secondary"
-            type="button"
-            onClick={onCancel}
-          >
-            Cancel
-          </button>
-        </div>
+    <div className="mt-4">
+      {/* Showing info */}
+      <div className="text-muted mb-2">
+        Showing <strong>{start}</strong>–<strong>{end}</strong> of{" "}
+        <strong>{total}</strong> results
       </div>
-    </form>
+
+      <nav>
+        <ul className="pagination justify-content-between align-items-center mb-0">
+          {/* Prev */}
+          <li className={`page-item ${!hasPrevPage ? "disabled" : ""}`}>
+            <button className="page-link" onClick={goPrev}>
+              ← Prev
+            </button>
+          </li>
+
+          {/* Page Numbers */}
+          <div className="d-flex gap-1">
+            {pages.map((p) => (
+              <li key={p} className={`page-item ${p === page ? "active" : ""}`}>
+                <button className="page-link" onClick={() => onPageChange(p)}>
+                  {p}
+                </button>
+              </li>
+            ))}
+          </div>
+
+          {/* Next */}
+          <li className={`page-item ${!hasNextPage ? "disabled" : ""}`}>
+            <button className="page-link" onClick={goNext}>
+              Next →
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
   );
 }
